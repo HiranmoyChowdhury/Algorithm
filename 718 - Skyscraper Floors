@@ -30,7 +30,7 @@ ll eeg(ll x, ll y, ll &a, ll &b){  ///extended euclid algo
     b=a1;
     return gcd;
 }
-ll create_edge(ll u, ll v){
+ll create_edge(ll u, ll v){   ///diophantine equations
     ll x1=x[u], y1=y[u], x2=x[v], y2=y[v], i, j, k;
     ll a, b, gcd;
     x2=-x2;   ///y1+ax1=y2+bx2; so, ax1-bx2=y2-y1;
