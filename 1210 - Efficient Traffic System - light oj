@@ -1,0 +1,103 @@
+    ///                      Hiranmoy Das Chowdhury-Sylhet Engineering College
+     
+    ///Strongly Connected Component
+    ///note: distribute all node on the base of "SCC"
+    ///then make sure every Component should have at least one in and one out edge
+     
+     
+     
+     
+    #include<bits/stdc++.h>
+    #define bst           ios_base::sync_with_stdio(0);
+    #define bug(x)        cerr<<#x<<'='<<x<<endl;
+    #define lp(i,a,b)     for(int i=a; i<=b; i++)
+    #define ll            long long int
+    #define eb            emplace_back
+    #define pb            push_back
+    #define mp            make_pair
+    using namespace std;
+    vector<ll> path[29999], ulta[29999], st, scc[29999], temp;
+    ll pos[29999], cnt;
+    bool visit[29999], in[29999], out[29999];
+    void dfs(ll n){
+        visit[n]=1;
+        ll i, j, limit=path[n].size();            ///dfs and dfs2 are to determine "strongly connected component"
+        for(i=0; i<limit; i++){
+            if(!visit[path[n][i]]) dfs(path[n][i]);
+        }
+        st.eb(n);
+    }
+    void dfs2(ll n){
+        visit[n]=1;
+        pos[n]=cnt;
+        ll i, limit=ulta[n].size();
+        for(i=0; i<limit; i++){
+            ll y=ulta[n][i];
+            if(!visit[y]) dfs2(y);
+        }
+        temp.eb(n);
+    }
+    void scc_connection(ll n){///connection betn diffrent "SCC"
+        visit[n]=true;
+        ll i,j, limit=scc[n].size();
+        for(i=0; i<limit; i++){
+            ll x=scc[n][i];
+            ll li=path[x].size();
+            for(j=0; j<li; j++){
+                ll y=path[x][j];
+                y=pos[y]; ///node position on which "SCC"
+                if(n==y) continue; ///if they are from same "SCC"
+                out[n]=in[y]=1;
+                if(visit[y]==false)  scc_connection(y);
+            }
+        }
+    }
+    int main(){
+        ll t, tc=1;
+        cin>>t;
+        while(t--){
+            ll n, m, i, j, k, l;
+            cnt=0;
+            cin>>n>>m;
+            for(i=0; i<n+5; i++) path[i].clear(), ulta[i].clear(), scc[i].clear();
+            st.clear();
+            while(m--){
+                ll u, v;
+                scanf("%lld %lld", &u, &v);
+                path[u].eb(v);
+                ulta[v].eb(u);
+            }
+            for(i=0; i<n+5; i++) visit[i]=0;
+           
+            for(i=1; i<=n; i++) if(!visit[i])  dfs(i); ///topological sort
+           
+            reverse(st.begin(), st.end());
+           
+            for(i=0; i<=n+5; i++) visit[i]=false;
+            ll limit=st.size();
+           
+            for(i=0; i<limit; i++){
+                if(visit[st[i]]==0){
+                    temp.clear();
+                    dfs2(st[i]);
+                    scc[cnt++]=temp;///here we get all node of same "SCC(strongly connected component"
+                 }
+            }
+            for(i=0; i<=cnt; i++) visit[i]=in[i]=out[i]=false;
+           
+            for(i=0; i<cnt; i++) if(visit[i]==false) scc_connection(i); ///connection betn every "SCC"
+           
+            ll ii=0, oo=0;
+           
+            for(i=0; i<cnt; i++){
+                if(!in[i]) ii++;
+                if(!out[i]) oo++;
+            }
+            ll ans=max(ii, oo);
+           
+            if(cnt==1) ans=0;///if there is only one "SCC"
+           
+            printf("Case %lld: %lld\n", tc++, ans);
+        }
+        return 0;
+    }
