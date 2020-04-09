@@ -1,0 +1,69 @@
+#include<bits/stdc++.h>
+#define bst           ios_base::sync_with_stdio(0);
+#define bug(x)        cerr<<#x<<'='<<x<<endl;
+#define lp(i,a,b)     for(int i=a; i<=b; i++)
+#define ll            long long int
+#define eb            emplace_back
+#define pb            push_back
+#define mp            make_pair
+using namespace std;
+ll mod=1000000000+7;
+ll bigmod(ll num, ll power, ll m){   ///bigmod
+    if(power==0) return 1;
+    ll x=bigmod(num, power/2, m);
+    x=(x*x)%m;
+    if(power%2==1) x=(x*num)%m;
+    return x;
+}
+int main(){
+    bst
+    ll m, i, j, k, p;
+    vector<pair<ll, ll>> num;
+    cin>>m;
+    ll arr[m+5];
+    for(i=0; i<m; i++){
+        cin>>arr[i];
+    }
+    
+    ll cnt=1;
+    sort(arr, arr+m);
+    for(i=1; i<m; i++){
+        if(arr[i]==arr[i-1]) cnt++;
+        else{
+            num.eb(arr[i-1], cnt);
+            cnt=1;
+        }
+    } 
+    num.eb(arr[m-1], cnt);
+    vector<ll> nod;
+    ll limit=num.size();
+    ll temp[limit+5];
+    temp[limit]=1;
+    for(i=limit-1; i>=0; i--) temp[i]=(temp[i+1]*(num[i].second+1))%(mod-1); 
+    ll keep=1;
+    for(i=0; i<limit; i++){
+        ll mm=keep*temp[i+1];
+        mm%=mod-1;
+        nod.eb(mm);     /// (a^x)%mod=(a^(x%(mod-1)))%mod
+        keep*=(num[i].second+1);
+        keep%=mod-1;
+    }
+    
+    ll ans=1;
+    for(i=0; i<limit; i++){
+        ll md=nod[i];
+        for(j=1 ; j<=num[i].second; j++){
+            keep=(md*j)%(mod-1);
+            ll x=bigmod(num[i].first, keep, mod);  ///bigmod
+            
+            ans*=x;
+            ans%=mod;
+        }
+    }
+    
+    cout<<ans<<endl;
+    
+    
+    
+    return 0;
+}
