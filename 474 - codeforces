@@ -1,0 +1,98 @@
+#include<bits/stdc++.h>
+#define bst           ios_base::sync_with_stdio(0);
+#define bug(x)        cerr<<#x<<'='<<x<<endl;
+#define lp(i,a,b)     for(int i=a; i<=b; i++)
+#define ll            long long int
+#define eb            emplace_back
+#define pb            push_back
+#define mp            make_pair
+using namespace std;
+ll g, mn, arr[100999], gcd_node[500000], mn_nm[500000];
+void init(ll node, ll b, ll e){    ///segment tree to save gcd and minimum value
+    if(b==e){
+        gcd_node[node]=arr[b];
+        mn_nm[node]=arr[b];
+        return ;
+    }
+    ll mid=(b+e)/2;
+    ll left=node*2, right=(node*2)+1;
+    init(left, b, mid); 
+    init(right, mid+1, e);
+    
+    gcd_node[node]=__gcd(gcd_node[left], gcd_node[right]);
+    mn_nm[node]=min(mn_nm[left], mn_nm[right]);
+}
+void find(ll l, ll r, ll node, ll b, ll e){   ///finding gcd and min value from segment tree
+    if(b>r || e<l) return ;
+    else if(b>=l && e<=r){
+        g=__gcd(g, gcd_node[node]);
+        mn=min(mn, mn_nm[node]);
+        return;
+    }
+    ll mid=b+e;
+    mid/=2;
+    find(l, r, node*2, b, mid);
+    find(l, r, (node*2)+1, mid+1, e);
+}
+int main(){
+    ll n, i, j, k;
+    cin>>n;
+    
+    for(i=1; i<=n; i++) scanf("%lld", &arr[i]);
+    
+    init(1, 1, n);
+    
+    map<ll, vector<ll>> cnt;
+    for(i=1; i<=n; i++) cnt[arr[i]].eb(i);
+    
+    ll t;
+    cin>>t;
+    while(t--){
+        ll l, r;
+        scanf("%lld %lld", &l, &r);
+        
+        if(r<l) swap(l, r);
+        
+        g=mn=arr[l];
+        
+        find(l, r, 1, 1, n);
+
+        if(g!=mn){
+            cout<<r-l+1<<endl;
+            continue;
+        }
+        
+        ll b, e;
+        
+        if(cnt[g][0]>=l) b=-1;
+        else{                              ///binary search
+            ll lo=0, hi=cnt[g].size()-1;
+            ll cholo=50;
+            while(cholo--){
+                ll mid=(lo+hi)/2;
+                if(cnt[g][mid]>=l) hi=mid;
+                else lo=mid;
+            }
+            for(i=lo; i<=hi; i++){
+                 if(cnt[g][i]<l) lo=i;
+            }
+            b=lo;
+        }
+        ll keep=50;
+        ll lo=0, hi=cnt[g].size()-1;
+        while(keep--){
+            ll mid=(lo+hi)/2;
+            if(cnt[g][mid]>r) hi=mid;
+            else lo=mid;
+        }
+        for(i=lo; i<=hi; i++){
+            if(cnt[g][i]<=r) lo=i;
+        }
+        e=lo;
+        keep=e-b;
+        
+        ll ans=r-l+1-(keep);
+        cout<<ans<<endl;
+    }
+    return 0;
+}
