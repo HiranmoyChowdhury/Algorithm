@@ -12,7 +12,7 @@ vector<pair<ll,ll>> path[2000], ulta[2000];
 bool check[2000];
 ll cnt=0;
 map<ll, vector<pair<ll, ll>>> scc_n;
-map<pair<ll, ll>, bool> mpp;
+map<pair<ll, ll>, ll> mpp;
 void topological_sort(ll n){
     ll limit=path[n].size();
     check[n]=true;
