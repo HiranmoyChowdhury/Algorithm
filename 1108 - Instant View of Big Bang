@@ -1,0 +1,135 @@
+#include<bits/stdc++.h>
+#define bst           ios_base::sync_with_stdio(0);
+#define bug(x)        cerr<<#x<<'='<<x<<endl;
+#define lp(i,a,b)     for(int i=a; i<=b; i++)
+#define ll            long long int
+#define eb            emplace_back
+#define pb            push_back
+#define mp            make_pair
+using namespace std;
+vector<ll> top_srt, scc;
+vector<pair<ll,ll>> path[2000], ulta[2000];
+bool check[2000];
+ll cnt=0;
+map<ll, vector<pair<ll, ll>>> scc_n;
+map<pair<ll, ll>, bool> mpp;
+void topological_sort(ll n){
+    ll limit=path[n].size();
+    check[n]=true;
+    for(ll i=0; i<limit; i++){
+        if(check[path[n][i].first]==false) topological_sort(path[n][i].first);
+    }
+    top_srt.eb(n);
+}
+void _scc(ll n){
+    ll limit=ulta[n].size();
+    check[n]=true;
+    for(ll i=0; i<limit; i++){
+        if(check[ulta[n][i].first]==false) _scc(ulta[n][i].first);
+        mpp[{ulta[n][i].first, n}]++, scc_n[ulta[n][i].first].eb(n, ulta[n][i].second);  ///collecting all path between a cycle for Time complexity
+                                                          ///          and "mpp" will save number of edge between two pair
+    }
+    scc.eb(n);
+}
+int main(){
+    ll t , tc=1;
+    cin>>t;
+    while(t--){
+        ll n, m, i, j, k, l;
+        scanf("%lld %lld", &n, &m);
+        for(i=0; i<n+5; i++) check[i]=false, path[i].clear(), ulta[i].clear();
+        for(i=0; i<m; i++){
+            ll u, v, w;
+            scanf("%lld %lld %lld", &u, &v, &w);
+            path[u].eb(v, w);
+            ulta[v].eb(u, w);
+        }
+        top_srt.clear();
+       
+        for(i=0; i<n; i++){
+            if(check[i]==false) topological_sort(i);
+        }
+        bool ans[n+5]={};
+        
+        for(i=0; i<n; i++) check[i]=false;
+        for(i=n-1; i>=0; i--){
+            if(check[top_srt[i]]==false){   
+                scc_n.clear(), scc.clear(), mpp.clear();
+                _scc(top_srt[i]);            ///finding every cycle
+                cnt=scc.size();
+                ll limit=scc_n.size();
+                
+                ///now we will check, if cycle is negetive or not
+                
+                if(cnt>1){
+                    bool flag=false;
+                    map<ll, ll> dist;
+                    for(j=1; j<cnt; j++){
+                        dist[scc[j]]=9999999999999999;
+                    }
+                    
+                    map<pair<ll, ll>, ll> ok;
+                    
+                    queue<ll> qq;
+                    qq.push(scc[0]);
+                    while(!qq.empty()){       ///negetive or not??(dijkstra algorithm)
+                        ll x=qq.front();
+                        qq.pop();
+                        ll lim=scc_n[x].size();
+                        for(j=0; j<lim; j++){
+                            ll y=scc_n[x][j].first, w=scc_n[x][j].second;
+                            if(dist[y]>dist[x]+w){
+                                dist[y]=dist[x]+w;
+                                qq.push(y);
+                                if(ok[{x, y}]>mpp[{x, y}]) flag=true;
+                                ok[{x, y}]++;
+                            }
+                            if(flag) break;
+                            
+                        }
+                        if(flag) break;
+                        
+                        
+                    }
+                    
+                    queue<ll> q;
+                    if(flag){   ///if the cycle is negetive, we will work on it
+                        for(j=0; j<cnt; j++){
+                            ll x=scc[j];
+                            q.push(x);
+                            ans[x]=true;
+                            check[x]=true;
+                        }
+                    }
+                   
+                    while(!q.empty()){  ///how many node are there, which we can reach on our negetive cycle, make them true
+                        ll x=q.front();
+                        ll lim=ulta[x].size();
+                        q.pop();
+                        for(j=0; j<lim; j++){
+                            ll y=ulta[x][j].first;
+                            if(ans[y]==false){
+                                q.push(y);
+                                check[y]=true;
+                                ans[y]=true;
+                            }
+                        }
+                    }
+                    
+                   
+                }
+            }
+        }
+        printf("Case %lld:", tc++);
+        ll keep=0;
+        for(i=0; i<n; i++){
+            if(ans[i]==true) keep++, printf(" %lld", i);
+        }
+        if(keep==0) cout<<" impossible";
+        cout<<endl;
+       
+       
+       
+    }
+    return 0;
+}
