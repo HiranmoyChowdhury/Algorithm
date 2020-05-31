@@ -1,0 +1,88 @@
+#include<bits/stdc++.h>
+#define bst           ios_base::sync_with_stdio(0);
+#define bug(x)        cerr<<#x<<'='<<x<<endl;
+#define lp(i,a,b)     for(int i=a; i<=b; i++)
+#define ll            long long int
+#define eb            emplace_back
+#define pb            push_back
+#define flush         fflush(stdout);
+#define pii            pair<ll, ll>
+using namespace std;
+int main(){
+    ll t, tc=1;
+    cin>>t;
+    while(t--){
+        ll n, i, j, k;
+        cin>>n;
+        vector<ll> path[2*n+1];
+        for(i=1; i<=n; i++){
+            for(j=0; j<n; j++){
+                ll x;
+                scanf("%lld", &x);
+                path[i].eb(x);
+            }
+        }
+        map<pair<ll, ll>, ll> edge, mp;
+        for(i=n+1; i<=2*n; i++){
+             for(j=1; j<=n; j++){
+                 ll x; scanf("%lld", &x);
+                 edge[{x, i}]=edge[{i, x}]=j;
+             }
+        }
+        vector<ll> pair(2*n+1);
+        fill(pair.begin(), pair.end(), 0); ///0 means there is nos such company, where he can join
+        queue<ll> q;
+        for(i=1; i<=n; i++) q.push(i);
+        while(!q.empty()){
+            vector<ll> vec[2*n+1];
+            while(!q.empty()){
+                ll x=q.front();
+                q.pop();
+                ll limit=path[x].size();
+                for(i=0; i<limit; i++){
+                    if(mp[{x, path[x][i]}]==false){   ///if we didn't take path[x][i] for 'x' yet, we will take it
+                        vec[path[x][i]].eb(x);
+                        mp[{x, path[x][i]}]=mp[{path[x][i], x}]=true;
+                        break;
+                    }
+                }
+            }
+            for(i=n+1; i<=2*n; i++){
+                if(vec[i].size()){
+                    ll limit=vec[i].size(), x;
+                    if(pair[i]){
+                        x=pair[i];
+                        for(j=0; j<limit; j++){  ///which x is more likely for i(company)
+                            if(edge[{i, vec[i][j]}]<edge[{x, i}]) x=vec[i][j];
+                        }
+                        if(pair[i]!=x){
+                            pair[i]=x;
+                        }
+                        vec[i].clear();
+                    }
+                    else{
+                        x=vec[i][0];
+                        for(j=1; j<limit; j++){  ///same as line-55
+                            if(edge[{i, vec[i][j]}]<edge[{x, i}]) x=vec[i][j];
+                        }
+                        pair[i]=x;
+                        vec[i].clear();
+                    }
+                }
+            }
+            bool temp[n+1]={};
+            for(i=n+1; i<=2*n; i++) temp[pair[i]]=true;
+            for(i=1; i<=n; i++){  ///if we didn't make a pair for i, we will search a couple for i again
+                if(temp[i]==false) q.push(i);
+            }
+        }
+        printf("Case %lld:", tc++);
+        vector<ll> ans(n+1);
+        for(i=n+1; i<=2*n; i++){
+            ans[pair[i]]=i;
+        }
+        for(i=1; i<=n; i++) printf(" (%lld %lld)", i, ans[i]);
+        cout<<endl;
+    }
+    return 0;
+}
