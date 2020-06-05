@@ -1,0 +1,96 @@
+//         Hiranmoy Das Chowdhury
+//   Sylhet Engineering College( EEE )
+
+//   **Max Flow**
+
+#include<bits/stdc++.h>
+#define bst           ios_base::sync_with_stdio(0);
+#define bug(x)        cerr<<#x<<'='<<x<<endl;
+#define lp(i,a,b)     for(int i=a; i<=b; i++)
+#define ll            long long int
+#define pb            emplace_back
+#define pii           pair<ll, ll>
+#define eb            emplace_back
+using namespace std;
+vector<ll> path[2000]; ll pos[2000];
+map<ll, map<ll, ll>> weight;
+void all_clear(ll n){
+    for(ll i=0; i<=n ; i++) path[i].clear();
+    weight.clear();
+}
+ll bfs(ll s, ll t){
+    queue<ll> q;
+    bool check[200]={};
+    q.push(s);
+    check[s]=true;
+    while(!q.empty()){
+        ll x=q.front(); q.pop();
+        ll limit=path[x].size();
+        for(ll i=0; i<limit; i++){
+            ll y=path[x][i];
+            if(check[y]) continue;
+            if(x<y){
+                if(weight[x][y]){
+                    pos[y]=x;
+                    q.push(y);
+                    check[y]=true;
+                    if(y==t) return true;
+                }
+            }
+            else{
+                if(weight[y][x]){
+                    pos[y]=x; check[y]=true; q.push(y);
+                    if(y==t) return true;
+                }
+            }
+            
+        }
+    }
+    return false;
+}
+int main(){
+    ll tt, tc=1; 
+    cin>>tt;
+    while(tt--){
+        ll n, s, t, c, i, j, k;
+        scanf("%lld %lld %lld %lld", &n, &s, &t, &c);
+        all_clear(n);
+        for(i=0; i<c; i++){
+            ll u, v, w;
+            scanf("%lld %lld %lld", &u, &v, &w);
+            if(u>v) swap(u, v);
+            path[u].eb(v); path[v].eb(u);
+            weight[u][v]+=w;
+        }
+        printf("Case %lld: ", tc++);
+        if(s==t){
+            cout<<0<<endl;
+            continue;
+        }
+        ll ans=0;
+        while(bfs(s, t)){
+            ll x=t, mn=20000;
+            while(x!=s){
+                ll y=pos[x];
+                if(x<y) mn=min(weight[x][y], mn);
+                else mn=min(mn, weight[y][x]);
+                x=y;
+            }
+            x=t;
+            while(x!=s){
+                ll y=pos[x];
+                if(x<y){
+                    weight[x][y]-=mn;
+                }
+                else weight[y][x]-=mn;
+                x=y;
+            }
+            ans+=mn;
+        }
+        printf("%lld\n", ans);
+        
+    }
+
+
+    return 0;
+}
