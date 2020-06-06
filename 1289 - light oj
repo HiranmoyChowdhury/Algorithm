@@ -1,0 +1,67 @@
+#include<bits/stdc++.h>
+#define bst           ios_base::sync_with_stdio(0);
+#define bug(x)        cerr<<#x<<'='<<x<<endl;
+#define lp(i,a,b)     for(int i=a; i<=b; i++)
+#define ll            long long
+#define pb            push_back
+using namespace std;
+int primes[5761999];
+long long sieve[(100000000/64)+100];
+unsigned int lcm[5761999];
+int main(){
+    ll i, j, k, l=0, m=0, mod=pow(2,32);
+    primes[m++]=2;
+    for(i=3; i<100000050; i+=2){
+        if(!(sieve[i/64]&(1LL<<(i%64)))){
+            primes[m++]=i;                       // bitmask sieve
+            for(j=i*i; j<100000050; j+=(i+i))
+                sieve[j/64] |= (1LL<<(j%64));
+        }
+    }
+    l=1;
+    for(i=0; i<m; i++){
+        l*=primes[i];
+        l%=mod;
+        lcm[i]=l;
+    }
+    ll t, tc=1, n;
+    cin>>t;
+    while(t--){
+       scanf("%lld", &n);
+        ll power=1;
+        ll last=80, hi=m, lo=0, mid;
+        while(last--){
+            mid=(lo+hi)/2;
+            if(primes[mid]<=n) lo=mid;   // binary search for finding the largest element which are smaller than "n"
+            else hi=mid;
+        }
+        last=lo;
+        for(i=last; primes[i]<=n; i++){
+            if(primes[i]<=n) last=i;
+            else break;
+        }
+        ll ans=1;
+        while(1){
+             ll cnt=50;
+             lo=0; hi=last;
+             while(cnt--){
+                 mid=(lo+hi)/2;
+                 if(pow(primes[mid], power)<=n) lo=mid;
+                 else hi=mid;
+             }
+             for(i=lo; i<=last; i++){
+                if(pow(primes[i], power)<=n) lo=i;
+                else break;
+             }
+             if(pow(primes[lo], power)>n) break;
+             ans*=lcm[lo];
+             ans%=mod;
+             last=lo;
+             power++;
+        }
+        printf("Case %lld: %lld\n", tc++, ans);
+    }
+ 
+ 
+    return 0;
+}
