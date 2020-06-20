@@ -1,0 +1,112 @@
+#include<bits/stdc++.h>
+#define bst           ios_base::sync_with_stdio(0);
+#define bug(x)        cerr<<#x<<'='<<x<<endl;
+#define lp(i,a,b)     for(int i=a; i<=b; i++)
+#define ll            long long int
+#define eb            emplace_back
+#define pb            push_back
+using namespace std;
+vector<ll> path[205], ans;
+ll weight[205][205], temp_w[205][205];
+ll pos[205];
+double x[200], y[200];
+bool bfs(ll n){
+    bool check[205]={};  
+    check[200]=true; 
+    queue<ll> q; q.push(200); 
+    while(!q.empty()){
+        ll x=q.front(); q.pop();
+        ll limit=path[x].size();
+        for(ll i=0; i<limit; i++){
+            ll y=path[x][i];
+            if(check[y]) continue;
+            if(temp_w[x][y]){
+                pos[y]=x;
+                check[y]=true;
+                q.push(y);
+                if(y==n) return true;
+            }
+        }
+    }
+    return false;
+}
+ll max_flow(ll n){
+    for(ll i=0; i<205; i++) for(ll j=0; j<205; j++) temp_w[i][j]=weight[i][j];
+    ll tot_f=0;
+    while(bfs(n)){
+        ll source=200;
+        ll y=n, min_flow=999999999;
+        while(y!=source){
+            ll x=pos[y];
+            min_flow=min(min_flow, temp_w[x][y]);
+            y=x;
+        }
+        tot_f+=min_flow;
+        y=n;
+        while(y!=source){
+            ll x=pos[y];
+            temp_w[x][y]-=min_flow;
+            temp_w[y][x]+=min_flow;
+            y=x;
+        }
+    }
+    return tot_f;
+   
+   
+}
+void clear(){
+    for(ll i=0; i<=200; i++) path[i].clear(), x[i]=y[i]=0;
+    ans.clear(); 
+    for(ll i=0; i<205; i++){
+        for(ll j=0; j<205; j++) weight[i][j]=0;
+    }
+}
+double dist(ll i, ll j){
+    double dd=((x[i]-x[j])*(x[i]-x[j]))+((y[i]-y[j])*(y[i]-y[j]));
+    return dd;
+}
+int main(){
+    ll t, tc=1;
+    cin>>t;
+    while(t--){
+        ll n, i, j, k;
+        clear();
+        cin>>n;
+        double d;
+        cin>>d;
+        d=d*d;
+        ll total=0;
+        for(i=0; i<n; i++){
+            ll mi, ni;
+            scanf("%lf %lf %lld %lld", &x[i], &y[i], &ni, &mi);
+            total+=ni;
+            if(ni){ path[200].eb(i); weight[200][i]=ni; }
+            if(mi){
+                path[i].eb(i+n);
+                path[i+n].eb(i);
+                weight[i][i+n]=mi;
+            }
+        }
+        for(i=0; i<n; i++){
+            for(j=0; j<n; j++){
+                if(i==j) continue;
+                if(dist(i, j)>d) continue;
+                path[i+n].eb(j);
+                path[j].eb(i+n);
+                weight[i+n][j]=1000;
+            }
+        }
+       
+        for(i=0; i<n; i++){
+            if(max_flow(i)==total) ans.eb(i);
+        }
+        
+        printf("Case %lld:", tc++);
+        ll limit=ans.size();
+        for(i=0; i<limit; i++) printf(" %lld", ans[i]);
+        if(limit==0) cout<<' '<<-1;
+        cout<<endl;
+       
+    }
+    return 0;
+}
