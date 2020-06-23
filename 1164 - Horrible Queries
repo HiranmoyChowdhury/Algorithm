@@ -1,0 +1,61 @@
+//      Hiranmoy Das Chowdhury
+//    Sylhet Engineering College
+
+
+
+// segment tree lazy with propagation
+
+
+#include<bits/stdc++.h>
+#define bst           ios_base::sync_with_stdio(0);
+#define bug(x)        cerr<<#x<<'='<<x<<endl;
+#define lp(i,a,b)     for(int i=a; i<=b; i++)
+#define ll            long long int
+#define eb            emplace_back
+#define pb            push_back
+#define inp(n)        scanf("%lld", &n);
+using namespace std;
+ll propagate[500000], value[500000];
+ll rl, rr, carry;
+ll ans(ll n, ll l, ll r){           ///update and query
+    if(l>rr || r<rl) return 0;
+    if(l>=rl && r<=rr){  
+        propagate[n]+=carry;
+        return ((r-l+1)*(propagate[n]))+value[n];
+    }
+    ll mid=(l+r)>>1, n1=n<<1, n2=(n<<1)+1;  /// if they intersect
+    
+    ll x=ans(n1, l, mid);
+    ll y=ans(n2, mid+1, r);
+    
+    ll keep=min(r, rr)-max(l, rl)+1;  
+    value[n]+=carry*keep;          ///we will update the value of sum
+    return x+y+(keep*propagate[n]);
+}
+int main(){
+    ll t;
+    scanf("%lld", &t);
+    for(ll cas=1; cas<=t; cas++){
+        ll n, i, j, k, q;
+        
+        inp(n) inp(q)
+        for(i=0; i<5*n; i++) propagate[i]=value[i]=0;
+        
+        printf("Case %lld:\n", cas);
+        for(k=0; k<q; k++){
+            ll keep , x, y, v;
+            inp(keep)
+            if(!keep){
+                inp(rl) inp(rr) inp(carry)
+                ans(1, 0, n-1);
+            }
+            else{
+                inp(rl) inp(rr) carry=0;
+                x=ans(1, 0, n-1);
+                printf("%lld\n", x);
+            }
+            
+        }
+    }
+    return 0;
+}
