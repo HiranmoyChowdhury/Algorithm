@@ -1,0 +1,72 @@
+#include<bits/stdc++.h>
+#define bst           ios_base::sync_with_stdio(0);
+#define bug(x)        cerr<<#x<<'='<<x<<endl;
+#define lp(i,a,b)     for(int i=a; i<=b; i++)
+#define ll            long long int
+#define eb            emplace_back
+#define pb            push_back
+#define inp(n)        scanf("%lld", &n);
+using namespace std;
+ll carry[2000000];
+void update(ll n, ll l, ll r, ll a, ll b){
+    if(l>b || r<a) return;
+    if(l>=a && r<=b){
+        carry[n]++;
+        return;
+    }
+    ll mid=(l+r)/2, n1=n+n, n2=n+n+1;
+    update(n1, l, mid, a, b); 
+    update(n2, mid+1, r, a, b);
+}
+ll query(ll n, ll l, ll r, ll pos){
+    if(l>pos || r<pos) return 0;
+    if(l==r && l==pos) return carry[n];
+    ll mid=(l+r)/2, n1=n+n, n2=n+n+1;
+    return query(n1, l, mid, pos)+query(n2, mid+1, r, pos)+carry[n];
+   
+}
+int main(){
+    ll t;
+    scanf("%lld", &t);
+    for(ll cas=1; cas<=t; cas++){
+        ll n, q, i, j, k;
+        scanf("%lld %lld", &n, &q);
+        vector<pair<ll, ll>> range;
+        vector<ll> point, temp;
+        map<ll , ll> mp;
+        ll m=1;
+        for(i=0; i<n; i++){
+            ll a, b; scanf("%lld %lld", &a , &b);
+            range.eb(a, b);
+            temp.eb(a); temp.eb(b);
+        }
+        for(i=0; i<q; i++){
+            scanf("%lld", &k);
+            point.eb(k); temp.eb(k);
+        }
+        sort(temp.begin(), temp.end());
+        ll lim=temp.size();
+        for(i=0; i<lim; i++){
+            if(i>0 && temp[i]==temp[i-1]) continue;   ///compress
+            mp[temp[i]]=m++;
+        }
+        for(i=0; i<2000000; i++) carry[i]=0;
+        for(i=0; i<n; i++){
+            ll x=range[i].first, y=range[i].second;
+            update(1, 0, 150000, mp[x], mp[y]);
+        }
+        printf("Case %lld:\n", cas);
+        for(i=0; i<q; i++){
+            ll ans=query(1, 0, 150000, mp[point[i]]);
+            printf("%lld\n", ans);
+        }
+        
+        
+        
+        
+        
+        
+        
+    }
+    return 0;
+}
