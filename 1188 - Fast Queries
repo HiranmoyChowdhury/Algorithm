@@ -1,0 +1,78 @@
+#include<bits/stdc++.h>
+#define bst           ios_base::sync_with_stdio(0);
+#define bug(x)        cerr<<#x<<'='<<x<<endl;
+#define lp(i,a,b)     for(int i=a; i<=b; i++)
+#define ll            long long int
+#define eb            emplace_back
+#define pb            push_back
+#define inp(n)        scanf("%lld", &n);
+using namespace std;
+ll k;
+struct query{
+    ll l, r, pos;
+};
+bool compare(query a, query b){
+    ll a1=a.l/k, b1=b.l/k;
+    if(a1==b1){
+        return a.r<b.r;
+    }
+    return a.l<b.l;
+}
+int main(){
+    ll t;
+    scanf("%lld", &t);
+    for(ll cas=1; cas<=t; cas++){
+        ll n, q, i, j;
+        scanf("%lld %lld", &n, &q);
+        k=sqrt(n);
+        ll arr[n+5];
+        query num[q+5];
+        for(i=1;i<=n;i++) scanf("%lld", &arr[i]);
+        for(i=1; i<=q; i++){
+            ll x, y;
+            inp(x) inp(y);
+            num[i].l=x; num[i].r=y; num[i].pos=i;
+        }
+        
+        
+        
+        
+        sort(num+1, num+q+1, compare);   ///special type of sort for sqrt decomposition
+        
+        
+        
+        
+        ll ans[q+1], cnt[100009];
+        for(i=0; i<100009; i++) cnt[i]=0;
+        num[0].l=num[0].r=1;
+        cnt[arr[1]]++;
+        num[0].pos=0;
+        ll keep=1;
+        
+        
+        
+        for(i=1; i<=q; i++){                       /// MO's algo
+            ll cl=num[i].l, cr=num[i].r, pl=num[i-1].l, pr=num[i-1].r;  ///cl means current 'l', pr means previous 'r'
+            for(j=pl; j<cl; j++){
+                cnt[arr[j]]--;
+                if(cnt[arr[j]]==0) keep--;
+            }
+            for(j=pl-1; j>=cl; j--){
+                cnt[arr[j]]++;
+                if(cnt[arr[j]]==1) keep++;
+            }
+            for(j=pr+1; j<=cr; j++){
+                cnt[arr[j]]++;
+                if(cnt[arr[j]]==1) keep++;
+            }
+            for(j=pr; j>cr; j--){
+                cnt[arr[j]]--;
+                if(cnt[arr[j]]==0) keep--;
+            }
+            ans[num[i].pos]=keep;
+        }
+        printf("Case %lld:\n", cas);
+        for(i=1; i<=q; i++) printf("%lld\n", ans[i]);
+    }
+    return 0;
+}
