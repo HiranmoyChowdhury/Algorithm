@@ -1,0 +1,74 @@
+///Hiranmoy Chowdhury
+///tutorial: https://codeforces.com/edu/course/2/lesson/4/2
+///problem: https://codeforces.com/edu/course/2/lesson/4/2/practice/contest/273278/problem/A
+
+
+
+#include<bits/stdc++.h>
+#define bst           ios_base::sync_with_stdio(0);
+#define bug(x)        cerr<<#x<<'='<<x<<endl;
+#define lp(i,a,b)     for(int i=a; i<=b; i++)
+#define ll            long long int
+#define eb            emplace_back
+#define pb            push_back
+#define inp(n)        scanf("%lld", &n);
+using namespace std;
+struct info{
+    ll pref, suff, mx, sum;
+};
+info seg[500000];
+ll arr[200000];
+void cholo(ll n, ll l, ll r){
+    if(l==r){
+        seg[n].pref=seg[n].suff=seg[n].mx=seg[n].sum=arr[l];
+        return;
+    }
+    ll mid=(l+r)/2, n1=n+n, n2=n+n+1;
+    cholo(n1, l, mid); cholo(n2, mid+1, r);
+    
+    seg[n].pref=max({seg[n1].pref, seg[n1].sum+seg[n2].pref, seg[n1].sum});
+    seg[n].suff=max({seg[n2].suff, seg[n2].sum+seg[n1].suff, seg[n2].sum});
+    seg[n].sum=seg[n1].sum+seg[n2].sum;
+    seg[n].mx=max({seg[n1].suff, seg[n2].pref, seg[n1].suff+seg[n2].pref});
+    ll x=max({seg[n].suff, seg[n].pref, seg[n].sum});
+    x=max({x, seg[n1].mx, seg[n2].mx});
+    seg[n].mx=max(seg[n].mx, x);
+}
+void update(ll n, ll l, ll r, ll pos, ll value){
+    if(r<pos || l>pos) return ;
+    if(pos==l && r==pos){
+        seg[n].pref=seg[n].suff=seg[n].mx=seg[n].sum=value;
+        return;
+    }
+    ll mid=(l+r)/2, n1=n+n, n2=n+n+1;
+    update(n1, l, mid, pos, value); update(n2, mid+1, r, pos, value);
+    seg[n].pref=max({seg[n1].pref, seg[n1].sum+seg[n2].pref, seg[n1].sum});
+    seg[n].suff=max({seg[n2].suff, seg[n2].sum+seg[n1].suff, seg[n2].sum});
+    seg[n].sum=seg[n1].sum+seg[n2].sum;
+    seg[n].mx=max({seg[n1].suff, seg[n2].pref, seg[n1].suff+seg[n2].pref});
+    ll x=max({seg[n].suff, seg[n].pref, seg[n].sum});
+    x=max({x, seg[n1].mx, seg[n2].mx});
+    seg[n].mx=max(seg[n].mx, x);
+    
+    
+    
+}
+int main(){
+    bst
+    ll n, m, i, j, k;
+    cin>>n>>m;
+    for(i=1; i<=n; i++) cin>>arr[i];
+    cholo(1, 1, n);
+    if(seg[1].mx<0) cout<<0<<endl;
+    else cout<<seg[1].mx<<endl;
+    
+    for(i=0; i<m; i++){
+        ll pos, v;
+        cin>>pos>>v;
+        pos++;
+        update(1, 1, n, pos, v);
+        if(seg[1].mx<0) cout<<0<<endl;
+        else cout<<seg[1].mx<<endl;
+    }
+    return 0;
+}
