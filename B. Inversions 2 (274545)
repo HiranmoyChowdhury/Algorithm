@@ -1,0 +1,64 @@
+#include<bits/stdc++.h>
+#define bst           ios_base::sync_with_stdio(0);
+#define bug(x)        cerr<<#x<<'='<<x<<endl;
+#define lp(i,a,b)     for(int i=a; i<=b; i++)
+#define ll            long long int
+#define eb            emplace_back
+#define pb            push_back
+#define inp(n)        scanf("%lld", &n);
+using namespace std;
+ll num[500000], ans[200000];
+ll find(ll n, ll l, ll r){
+    num[n]--;
+    if(l==r){
+        return l;
+    }
+    ll mid=(l+r)/2, n1=n+n, n2=n+n+1;
+    if(num[n2]){
+        return find(n2, mid+1, r);
+    }
+    else return find(n1, l, mid);
+}
+ll init(ll n, ll l, ll r, ll value){
+    ll mid=(l+r)/2, n1=n+n, n2=n+n+1;
+    if(value==num[n]){
+        num[n]--;
+        if(l!=r){
+            if(num[n2]){
+                return find(n2, mid+1, r);
+            }
+            else{
+                return find(n1, l, mid);
+            }
+        }
+        return r;
+    }
+    num[n]--;
+    if(num[n1]>=value){
+        return init(n1, l, mid, value);
+    }
+    else{
+        return init(n2, mid+1, r, value-num[n1]);
+    }
+}
+void clear(ll n, ll l ,ll r){
+    if(l==r){
+        num[n]=1;
+        return;
+    }
+    ll mid=(l+r)/2, n1=n+n, n2=n+n+1;
+    clear(n1, l, mid); clear(n2, mid+1, r);
+    num[n]=num[n1]+num[n2];
+}
+int main(){
+    ll n, i, j, k;
+    inp(n)
+    ll arr[n+5];
+    for(i=1; i<=n; i++) inp(arr[i]);
+    clear(1, 1, n);
+    for(i=n; i>0; i--){
+        ans[i]=init(1, 1, n, i-arr[i]);
+    }
+    for(i=1; i<=n; i++) printf("%lld ", ans[i]);
+    return 0;
+}
