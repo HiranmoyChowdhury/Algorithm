@@ -1,0 +1,138 @@
+#include<bits/stdc++.h>
+#define bst           ios_base::sync_with_stdio(0);
+#define bug(x)        cerr<<#x<<'='<<x<<endl;
+#define lp(i,a,b)     for(int i=a; i<=b; i++)
+#define ll            long long int
+#define eb            emplace_back
+#define pb            push_back
+#define inp(n)        scanf("%lld", &n);
+using namespace std;
+vector<ll> path[40000];
+ll arr[40000], seg_tree[80000], sum[400000], m;
+ll neg[80000], pos[80000];
+ll level[40000], sparse_table[40000][20];
+bool vis[80000];
+ll idx, value;
+void dfs(ll n){                       ///euler tour tree
+    vis[n]=true;
+    pos[n]=m;
+    seg_tree[m++]=n;
+    ll limit=path[n].size();
+    for(ll i=0; i<limit; i++){
+        ll x=path[n][i];
+        if(vis[x]) continue;
+        dfs(x);
+    }
+    neg[n]=m;
+    seg_tree[m++]=n;
+}
+void st(ll n, ll carry){                           ///making sperse table
+    vis[n]=true;
+    level[n]=carry;
+    ll limit=path[n].size();
+    if(n>0)
+    for(ll i=1; i<20; i++){
+        ll p=sparse_table[n][i-1];
+        if(sparse_table[p][i-1]==-1) break;
+        sparse_table[n][i]=sparse_table[p][i-1];
+    }
+    for(ll i=0; i<limit; i++){
+        ll x=path[n][i];
+        if(vis[x]) continue;
+        sparse_table[x][0]=n;
+        st(x, carry+1);
+    }
+}
+void seg(ll n, ll l, ll r){                        ///segment tree on euler tour tree
+    if(l==r){
+        ll num=seg_tree[l];
+        if(pos[num]==l) sum[n]=arr[num];
+        else sum[n]=arr[num]*(-1);
+        return;
+    }
+    ll mid=(l+r)/2, n1=n+n, n2=n+1+n;
+    seg(n1, l, mid); seg(n2, mid+1, r);
+    sum[n]=sum[n1]+sum[n2];
+}
+ll find(ll n, ll l, ll r, ll a, ll b){               ///query
+    if(l>b || r<a) return 0;
+    if(l>=a && r<=b) return sum[n];
+    ll mid=(l+r)/2, n1=n+n, n2=n+1+n;
+    return find(n1, l, mid, a, b)+find(n2, mid+1, r, a, b);
+}
+void update(ll n, ll l, ll r){                 ///update
+    if(idx<l || idx>r) return;
+    if(l==r && l==idx){
+        sum[n]=value;
+        return;
+    }
+    ll mid=(l+r)/2, n1=n+n, n2=n+1+n;
+    update(n1, l, mid); update(n2, mid+1, r);
+    sum[n]=sum[n1]+sum[n2];
+}
+int main(){
+    ll t;
+    scanf("%lld", &t);
+    for(ll cas=1; cas<=t; cas++){
+        ll n, i, j, k, l;
+        scanf("%lld", &n);
+        for(i=0; i<n; i++) scanf("%lld", &arr[i]);
+        for(i=0; i<n; i++) path[i].clear();
+        for(i=1; i<n; i++){
+            ll u, v; inp(u) inp(v)
+            path[u].eb(v); path[v].eb(u);
+        }
+        
+        for(i=0; i<=n; i++) vis[i]=false; m=0;
+        dfs(0);
+        
+        seg(1, 0, m-1);
+        
+        for(i=0; i<=n; i++) vis[i]=false;
+        for(i=0; i<n; i++) for(j=0; j<20; j++) sparse_table[i][j]=-1;
+        st(0, 1);
+        printf("Case %lld:\n", cas);
+        ll q;
+        inp(q)
+        while(q--){
+            ll c; 
+            inp(c)
+            if(!c){
+                ll l, r;
+                inp(l) inp(r);
+                if(level[l]<level[r]) swap(l, r);                     ///finding LCA
+                ll temp_l=l, temp_r=r;      /// l boro, r chuto
+                for(i=19; i>=0; i--){
+                    if(sparse_table[temp_l][i]!=-1 && level[sparse_table[temp_l][i]]>=level[temp_r]){
+                        temp_l=sparse_table[temp_l][i];
+                    }
+                }
+                ll common;
+                if(temp_l==temp_r) common=temp_l;
+                else{
+                    for(i=19; i>=0; i--){
+                        if(sparse_table[temp_l][i]!=-1 && sparse_table[temp_l][i]!=sparse_table[temp_r][i]){
+                            temp_l=sparse_table[temp_l][i];
+                            temp_r=sparse_table[temp_r][i];
+                        }
+                    }
+                    common=sparse_table[temp_l][0];                             ///LCA
+                }
+                ll ans=find(1, 0, m-1, pos[common], pos[l])+find(1, 0, m-1, pos[common], pos[r])-arr[common];
+                printf("%lld\n", ans);
+            }
+            
+            else{
+                ll l, v; 
+                scanf("%lld %lld", &l, &v);
+                idx=pos[l], value=v;
+                update(1, 0, m-1);
+                
+                idx=neg[l], value*=-1;
+                update(1, 0, m-1);
+                arr[l]=v;
+            }
+        }
+    }
+    return 0;
+}
