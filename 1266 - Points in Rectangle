@@ -1,0 +1,64 @@
+///   Hiranmoy Chowdhury
+/// for 2D grid we use BIT on DP
+
+#include<bits/stdc++.h>
+#define bst           (ios_base:: sync_with_stdio(false),cin.tie(NULL));
+#define bug(x)        cerr<<#x<<'='<<x<<endl;
+#define lp(i,a,b)     for(int i=a; i<=b; i++)
+#define ll             int
+#define eb            emplace_back
+#define pb            push_back
+#define inp(n)        scanf("%d", &n)
+using namespace std;
+ll update[1099][2099];
+bool check[1099][1099]={};
+ll prefix(ll x, ll y){
+    ll ret=0;
+    ll temp_y=y;
+    while(x>0){
+            y=temp_y;
+        while(y>0){                ///query
+            ret+=update[x][y];
+            y-=y&((y^2047)+1);
+        }
+        x-=x&((x^2047)+1);
+    }
+    return ret;
+
+}
+int main(){
+    ll t, i, j, k, l;
+    inp(t);
+    for(ll cas=1; cas<=t; cas++){
+        printf("Case %lld:\n",cas);
+        for(i=0; i<1099; i++) for(j=0; j<1099; j++) update[i][j]=0, check[i][j]=false;
+        ll q;
+        inp(q);
+        while(q--){
+            inp(k);
+            if(!k){
+                ll x, y;
+                scanf("%d%d", &x, &y);
+                if(check[x][y]) continue;
+                check[x][y]=true;
+                x+=2, y+=2;
+                ll temp_y=y;
+                while(x<=1002){
+                    y=temp_y;
+                    while(y<=1002){   ///update
+                        update[x][y]++;
+                        y+=y&((y^2047)+1);
+                    }
+                    x+=x&((x^2047)+1);
+                }
+                continue;
+            }
+            ll x1, y1, x2, y2;
+            scanf("%d%d%d%d", &x1, &y1, &x2, &y2);
+            x1+=2, y1+=2, x2+=2, y2+=2;
+            ll sum=prefix(x2, y2)-prefix(x2, y1-1)-prefix(x1-1, y2)+prefix(x1-1, y1-1);  ///query
+            printf("%d\n", sum);
+        }
+    }
+    return 0;
+}
