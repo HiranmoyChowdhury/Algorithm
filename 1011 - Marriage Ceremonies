@@ -1,0 +1,45 @@
+#include<bits/stdc++.h>
+#define bst           (ios_base:: sync_with_stdio(false),cin.tie(NULL));
+#define bug(x)        cerr<<#x<<'='<<x<<endl;
+#define lp(i,a,b)     for(int i=a; i<=b; i++)
+#define ll            long long int
+#define eb            emplace_back
+#define pb            push_back
+#define inp(n)        scanf("%lld", &n)
+using namespace std;
+ll n, arr[20][20];
+ll mem[100000];
+ll f(ll node, ll rakho){
+	if(rakho==(1<<n)-1 ) return 0;
+	if(mem[rakho]>0) return mem[rakho];
+	
+	ll ret=0;
+	
+	for(ll i=1; i<=n; i++){
+		ll x=1<<(i-1);
+		if(rakho&x) continue;
+		ret=max(ret , f(node+1, rakho|x) + arr[node][i] );
+	}
+	mem[rakho]=ret;
+	return ret;
+	
+	
+}
+int main(){
+    ll t, tc=1;
+    inp(t);
+    while(t--){
+		inp(n);
+		ll i, j, k;
+		for(i=1; i<=n; i++) for(j=1; j<=n; j++) inp(arr[i][j]);
+		for(i=0; i<=65536; i++) mem[i]=0;
+		ll ans=f(1, 0);
+		
+		printf("Case %lld: %lld\n", tc++, ans);
+		
+		
+		
+		
+	}
+    return 0;
+}
