@@ -1,0 +1,150 @@
+#include<bits/stdc++.h>
+#define bst           ios_base::sync_with_stdio(0);
+#define bug(x)        cerr<<#x<<'='<<x<<endl;
+#define lp(i,a,b)     for(int i=a; i<=b; i++)
+#define ll            int
+#define eb            emplace_back
+#define pb            push_back
+#define NIL           0
+#define INF           INT_MAX
+using namespace std;
+ll n, m;
+vector<ll> path[20099];
+vector<pair<ll, ll> > adj[20099];
+ll pair_u[10099], pair_v[10099], dist[10099];
+
+bool dfs(ll u){
+
+    if (u != NIL)
+    {
+        ll siz=path[u].size();
+        for (ll i=0; i<siz; i++)
+        {
+            // Adjacent vertex of u
+            int v = path[u][i];
+
+            // Follow the distances set by BFS search
+            if (dist[pair_v[v]] == dist[u] + 1)
+            {
+                // If dfs for pair of v also returnn true then
+                if (dfs(pair_v[v]) == true)
+                {   // new matching possible, store the matching
+                    pair_v[v] = u;
+                    pair_u[u] = v;
+                    return true;
+                }
+            }
+        }
+
+        // If there is no augmenting path beginning with u then.
+        dist[u] = INF;
+        return false;
+    }
+    return true;
+
+
+
+}
+
+bool bfs(){
+    queue<ll> q;
+
+    for (int u = 1; u <= n; u++){
+        if (!pair_u[u]){
+            dist[u] = 0;
+            q.push(u);
+        }
+        else  dist[u] = INF;
+    }
+    dist[0]=INF;
+
+    while (!q.empty()){
+        int u = q.front();
+        q.pop();
+        if (dist[u] < dist[NIL]){
+            ll siz=path[u].size();
+            for (ll i=0; i<siz; i++)
+            {
+                ll v = path[u][i];
+
+                if (dist[pair_v[v]] == INF){
+                    dist[pair_v[v]] = dist[u] + 1;
+                    q.push(pair_v[v]);
+                }
+            }
+        }
+    }
+
+    return (dist[NIL] != INF);
+
+}
+bool check(){
+    for(ll i=0; i<=n; i++) pair_u[i]=pair_v[i]=dist[i]=0;
+
+    ll ret=0;
+
+    while(bfs()){
+        for(ll i=1; i<=n; i++){
+            if (pair_u[i]==0 && dfs(i))
+                ret++;
+        }
+
+    }
+    return ret==n;
+}
+void solve(){
+    cin>>n>>m;
+
+    for(ll i=0; i<m; i++){
+        ll u, v, w; cin>>u>>v>>w;
+        adj[u].pb({w, v});
+       // adj[v+n].pb({w, u});
+    }
+    for(ll i=1; i<=n; i++) sort(adj[i].begin(), adj[i].end());
+
+    ll lo=1, hi=1000000099;
+    ll cholbe=30;
+    while(cholbe--){
+        ll mid=(lo+hi)>>1;
+
+        for(ll i=0; i<=n; i++) path[i].clear();
+
+        for(ll i=1; i<=n; i++){
+            ll limit=adj[i].size();
+            for(ll j=0; j<limit; j++){
+                ll x=adj[i][j].second, w=adj[i][j].first;
+                if(w>mid) break;
+                path[i].eb(x);
+            }
+        }
+       // cout<<lo<<' '<<hi<<endl;
+
+
+
+        if(check()) hi=mid;
+        else lo=mid;
+    }
+
+    if(hi>1000000000) cout<<-1<<endl;
+    else cout<<hi<<endl;
+
+
+
+
+
+
+
+
+
+
+}
+int main(){
+   // bst;
+
+
+    ll t=1;
+   // cin>>t;
+    while(t--) solve();
+
+    return 0;
+}
